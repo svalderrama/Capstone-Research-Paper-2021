@@ -1,0 +1,300 @@
+rm(list=ls())
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(writexl)
+library(tibble)
+library(lattice)
+
+getvar1 <-function(df){
+  df<-df %>% 
+    select(year,Stab,zcta5,County, AreaSQMI,
+           TotPop,
+           NonHispWhite,
+           TotHHs,
+           MedianHHInc,
+           AvgHHInc,
+           Poor,
+           CivLabForce,
+           EmployedCLF,
+           AvgCommute,
+           AvgHHSize,
+           HHPop,
+           HighSchool,
+           pctHighSchool,
+           Bachelors,
+           pctBachelors,
+           TotHUs,
+           OccHUs,
+           OwnerOcc,
+           RenterOcc,
+           VacHUs,
+           VacantForSale,
+           VacantForRent,
+           Units1,
+           Units2,
+           Units3_4,
+           Units5_9,
+           Units10_19,
+           Units20up,
+           MobileHomes,
+           BoatRV,
+           Built2000_2009,
+           Built1990_1999,
+           Built1980_1989,
+           Built1970_1979,
+           Built1960_1969,
+           Built1950_1959,
+           Built1940_1949,
+           BuiltBefore1940,
+           NoVehicles,
+           Vehicles1,
+           Vehicles2,
+           VehiclesGE3,
+           NoPlumbing,
+           NoKitchen,
+           NoPhone,
+           MedianHValue,
+           AvgHValue,
+           HUsMort)
+  return( df)
+}
+
+getvar2 <-function(df){
+  df<-df %>% 
+    select(year,Stab,zcta5,County, AreaSQMI,
+           TotPop,
+           NonHispWhite,
+           TotHHs,
+           MedianHHInc,
+           AvgHHInc,
+           Poor,
+           CivLabForce,
+           EmployedCLF,
+           AvgCommute,
+           AvgHHSize,
+           HHPop,
+           HighSchool,
+           pctHighSchool,
+           Bachelors,
+           pctBachelors,
+           TotHUs,
+           OccHUs,
+           OwnerOcc,
+           RenterOcc,
+           VacHUs,
+           VacantForSale,
+           VacantForRent,
+           Units1,
+           Units2,
+           Units3_4,
+           Units5_9,
+           Units10_19,
+           Units20up,
+           MobileHomes,
+           BoatRV,
+           Built2010orLater,
+           Built2000_2009,
+           Built1990_1999,
+           Built1980_1989,
+           Built1970_1979,
+           Built1960_1969,
+           Built1950_1959,
+           Built1940_1949,
+           BuiltBefore1940,
+           NoVehicles,
+           Vehicles1,
+           Vehicles2,
+           VehiclesGE3,
+           NoPlumbing,
+           NoKitchen,
+           NoPhone,
+           MedianHValue,
+           AvgHValue,
+           HUsMort)
+  return(df)
+}
+getaldivar<-function(df){
+  df<-df %>% 
+    select(Address,
+           City,
+           State,
+           Zip,
+           Year,
+           LocSale
+    )
+}
+
+
+#File imports#############################
+#a2010 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2010zcta.csv")
+a2011 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2011zcta.csv")
+a2012 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2012zcta.csv")
+a2013 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2013zcta.csv")
+a2014 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2014zcta.csv")
+a2015 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2015zcta.csv")
+a2016 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2016zcta.csv")
+a2017 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2017zcta.csv")
+a2018 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2018zcta.csv")
+a2019 <- read.csv("C:/Users/17325/Desktop/S2021/Eco 400/s2/acs2019zcta.csv")
+location <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/Project/Location.xlsx", sheet = "Sheet2")
+zip<-read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/ziptozcta.xlsx")
+#################################################
+
+
+
+  ###get all desired variables##########
+
+a2011<-getvar1(a2011)
+a2012<-getvar2(a2012)
+a2013<-getvar2(a2013)
+a2014<-getvar2(a2014)
+a2015<-getvar2(a2015)
+a2016<-getvar2(a2016)
+a2017<-getvar2(a2017)
+a2018<-getvar2(a2018)
+a2019<-getvar2(a2019)
+
+
+#clean Aldi Location File#########################
+  ###make zip num####
+location$zip <- as.numeric(as.character(location$zip))
+
+  ###zip to zcta####
+for(x in location$zip){
+  z<-which(location$zip==x)
+  y<-which(zip$ZIP==x)
+  location$zcta5[z]<- zip$ZCTA[y]
+  
+}
+
+#Panel Compilation####
+  ###ACS data####
+df<-a2011
+df$Built2010orLater=0
+df<-rbind(df,a2012)
+df<-rbind(df,a2013)
+df<-rbind(df,a2014)
+df<-rbind(df,a2015)
+df<-rbind(df,a2016)
+df<-rbind(df,a2017)
+df<-rbind(df,a2018)
+df<-rbind(df,a2019)
+
+###ny only loc###
+df<-subset(df,Stab=="NY")
+
+  ###aldi location####
+df <- merge(df, location, by = "zcta5", all = TRUE)
+
+#Panel Cleanup####
+
+names(df)[names(df) == "yr"] <- "afirstyear"
+#names(df)[names(df) == "renyr"] <- "arenyear"
+
+  ### count id var ####
+df$id<-seq(from=1,by=1,length.out=length(df$zcta5))
+  ###aldi indicator var####
+for (x in df$id) {
+  df$alind[x]<-0
+  
+  if(!is.na(df$afirstyear[x])){
+    if(df$year[x]>=df$afirstyear[x]){
+      df$alind[x]<-1
+     }
+
+  }
+}
+
+  ###add region and region id and county id####
+
+df$County<-gsub(" NY","",df$County)
+df$County<-gsub(" ","-",df$County)
+
+NYRegions <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/NYRegions.xlsx")
+df <- merge(df, NYRegions, by = "County", all = TRUE)
+  ###remove punctuation and make numeric####
+
+for(x in 1:ncol(df)){
+  if(x!=which(colnames(df)=="County") & x!=which(colnames(df)=="Region")){
+  df[,x]<-gsub("[$,]","",df[,x])
+  df[,x] <- as.numeric(as.character(df[,x]))
+  }
+}
+
+  ###Adjust for inflation####
+
+CPIH <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/CPIHOSSL.xls", range = "B11:C21")
+CPIW <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/CWSR0000SA0.xls", range = "A11:B21")
+for (x in df$id) {
+  h<-which(CPIH$observation_year==df$year[x])
+  w<-which(CPIW$observation_year==df$year[x])
+  if(!is.na(df$AvgHValue[x])){
+    df$AvgHValue[x]<-(df$AvgHValue[x]/CPIH$index[h])*100
+  }
+  if(!is.na( df$MedianHValue[x])){
+    df$MedianHValue[x]<-(df$MedianHValue[x]/CPIH$index[h])*100
+  } 
+  if(!is.na(df$MedianHHInc[x])){
+    df$MedianHHInc[x]<-(df$MedianHHInc[x]/CPIW$index[w])*100
+  } 
+}
+
+
+
+  ###Remove if there is no county####
+df<-subset(df,County!="")
+###zip id####
+df$zcta5_id <- as.numeric(factor(df$zcta5))
+###removing zips that were never observed for med housing value or avg commute####
+absent<-subset(df, is.na(MedianHValue))
+absent_occur <- data.frame(table(absent$zcta5_id))
+for (x in absent_occur$Var1) {
+  if(absent_occur$Freq[which(absent_occur$Var1==x)]>=1){
+    df<-subset(df,zcta5_id!=x)
+  }
+}
+
+absent<-subset(df, is.na(AvgCommute))
+absent_occur <- data.frame(table(absent$zcta5_id))
+
+for (x in absent_occur$Var1) {
+  if(absent_occur$Freq[which(absent_occur$Var1==x)]>=1){
+    df<-subset(df,zcta5_id!=x)
+  }
+}
+
+
+#recheck
+absent<-subset(df, is.na(MedianHValue))
+absent_occur <- data.frame(table(absent$zcta5_id))
+
+absent<-subset(df, is.na(AvgCommute))
+absent_occur <- data.frame(table(absent$zcta5))
+
+
+
+###reorder####
+df<-df%>% select(zcta5_id,year,zcta5,MedianHValue,
+                 AreaSQMI,alind,
+                 TotHUs, OccHUs,HUsMort, Units1:BoatRV, 
+                 Built2010orLater, Built2000_2009: BuiltBefore1940, 
+                 NoPlumbing:NoKitchen,
+                 TotHHs, HHPop,AvgHHSize, MedianHHInc,
+                 TotPop,CivLabForce,EmployedCLF,
+                 NonHispWhite, 
+                 HighSchool:pctBachelors,
+                 Poor,
+                 AvgCommute,NoVehicles:VehiclesGE3)
+
+
+
+###relabel zip id####
+df$zcta5_id <- as.numeric(factor(df$zcta5))
+
+
+
+backupdf<-df
+#export####
+write_xlsx(df,"C:/Users/17325/Desktop/S2021/Eco 400/Project/data2.xlsx")
+
