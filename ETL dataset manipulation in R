@@ -1,4 +1,12 @@
-#Formatting Aldi workbook for merger ##################### 
+rm(list=ls())
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(writexl)
+library(tibble)
+library(lattice)
+
+#Formatting Aldi workbooks for merger ##################### 
 #aldi locations workbook import
 aldilocations <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/Project/Location.xlsx", sheet = "Sheet2")
 #zip to azcta converter import 
@@ -13,6 +21,7 @@ for(x in aldilocations$zip){
   y<-which(zip$ZIP==x)
   aldilocations$zcta5[z]<- zip$ZCTA[y]
 }
+
 aldilocations<-aldilocations %>% 
   select(yr,zcta5)
 rm(zip,x,y,z)
@@ -29,6 +38,7 @@ getvar2011 <-function(df){
            BuiltBefore1940)
   return( df)
 }
+
 getvar <-function(df){
   df<-df %>% 
     select(year, Stab, zcta5, County, MedianHValue, TotHUs, OccHUs, HUsMort, Units1, Units2, 
@@ -86,12 +96,12 @@ for (i in colnames(df)){
     df[[i]] <- as.numeric(as.character(df[[i]]))
   }
 }
+
 rm(i)
 
 #delete NA rows first from medianHVal,  
 zun<- data.frame(zcta=unique(df$zcta5),count=0) #df with list of zcta
 absent<-subset(df, is.na(MedianHValue))#df containing rows with na values
-
 #counting to see if each zcta is in the absent df, and if it is, to delete all rows with that zcta
 c=1
 for (i in zun$zcta){
@@ -106,7 +116,6 @@ absent<-subset(df, is.na(AvgCommute))
 c=1
 for (i in zun$zcta){
   zun$count[c]<-length(which(absent$zcta5== i))
-  
   if(zun$count[c]>0){
     df<-subset(df,zcta5!=i)
   }
@@ -120,7 +129,6 @@ df$id<-seq(from=1,by=1,length.out=length(df$zcta5))
 #set aldi indicator var
 for (i in df$id) {
   df$aldi[i]<-0
-  
   if(!is.na(df$yr[i])){
     if(df$year[i]>=df$yr[i]){
       df$aldi[i]<-1
@@ -131,6 +139,7 @@ for (i in df$id) {
 # Taking 'NY' out of county col and adding a hyphen in between New and York for New york county
 df$County<-gsub(" NY","",df$County)
 df$County<-gsub(" ","-",df$County)
+
 #add ny regions, and region and county codes
 NYRegions <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/NYRegions.xlsx")
 df <- merge(df, NYRegions, by = "County", all = TRUE)
@@ -141,7 +150,6 @@ CPIW <- read_excel("C:/Users/17325/Desktop/S2021/Eco 400/s2/CWSR0000SA0.xls", ra
 for (i in df$id) {
   h<-which(CPIH$observation_year==df$year[i])
   w<-which(CPIW$observation_year==df$year[i])
-  
   if(!is.na( df$MedianHValue[i])){
     df$MedianHValue[i]<-(df$MedianHValue[i]/CPIH$index[h])*100
   } 
